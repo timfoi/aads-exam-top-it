@@ -61,6 +61,8 @@ namespace alisov
 int main(int argc, char *argv[])
 {
   alisov::Vector< alisov::Person > people;
+  alisov::init(people);
+
   if (argc < 1) {
     return 1;
   }
