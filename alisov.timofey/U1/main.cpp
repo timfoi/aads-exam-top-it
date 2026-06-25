@@ -23,5 +23,13 @@ namespace alisov
   };
 }
 
-int main()
-{}
+int main(int argc, char *argv[])
+{
+  alisov::Vector< alisov::Person > people;
+  if (argc < 1) {
+    return 1;
+  }
+  if (argc > 3) {
+    return 1;
+  }
+}
