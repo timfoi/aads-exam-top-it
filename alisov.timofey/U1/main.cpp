@@ -148,8 +148,10 @@ int main(int argc, char *argv[])
   alisov::init(people);
   size_t success_count = 0;
   size_t ignore_count = 0;
+  size_t total_lines = 0;
   std::string line = "";
   while (std::getline(input, line)) {
+    ++total_lines;
     alisov::Person p;
     bool is_empty = false;
     if (alisov::parse_person(line, p, is_empty)) {
@@ -182,5 +184,7 @@ int main(int argc, char *argv[])
   if (has_out) {
     f_out.close();
   }
-  std::cerr << success_count << " " << ignore_count << "\n";
+  if (total_lines > 0) {
+    std::cerr << success_count << " " << ignore_count << "\n";
+  }
 }
