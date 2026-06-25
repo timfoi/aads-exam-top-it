@@ -68,21 +68,28 @@ namespace alisov
     return true;
   }
 
-  bool parse_person(const std::string &line, Person &out_person)
+  bool parse_person(const std::string &line, Person &out_person, bool &is_ignorable)
   {
+    is_ignorable = false;
     if (line.empty()) {
+      is_ignorable = true;
       return false;
     }
     const size_t first_non_space = line.find_first_not_of(" \t\r\n");
     if (first_non_space == std::string::npos) {
+      is_ignorable = true;
       return false;
     }
     if (line[first_non_space] < '0' || line[first_non_space] > '9') {
       return false;
     }
     const size_t id_end = line.find_first_of(" \t\r\n", first_non_space);
-    const std::string id_str = (id_end == std::string::npos) ? line.substr(first_non_space)
-                                                             : line.substr(first_non_space, id_end - first_non_space);
+    std::string id_str = "";
+    if (id_end == std::string::npos) {
+      id_str = line.substr(first_non_space);
+    } else {
+      id_str = line.substr(first_non_space, id_end - first_non_space);
+    }
     size_t parsed_bytes = 0;
     const unsigned long long temp_id = std::stoull(id_str, &parsed_bytes);
     if (parsed_bytes != id_str.length()) {
@@ -110,13 +117,13 @@ int main(int argc, char *argv[])
   bool has_out = false;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
-    if (arg.substr(0, 3) == "in:") {
+    if (arg.length() >= 3 && arg.substr(0, 3) == "in:") {
       if (has_in) {
         return 1;
       }
       in_file = arg.substr(3);
       has_in = true;
-    } else if (arg.substr(0, 4) == "out:") {
+    } else if (arg.length() >= 4 && arg.substr(0, 4) == "out:") {
       if (has_out) {
         return 1;
       }
@@ -144,7 +151,8 @@ int main(int argc, char *argv[])
   std::string line = "";
   while (std::getline(input, line)) {
     alisov::Person p;
-    if (alisov::parse_person(line, p)) {
+    bool is_ignorable = false;
+    if (alisov::parse_person(line, p, is_ignorable)) {
       if (alisov::id_unique(people, p.id)) {
         alisov::push_back(people, p);
         ++success_count;
@@ -152,7 +160,9 @@ int main(int argc, char *argv[])
         ++ignore_count;
       }
     } else {
-      ++ignore_count;
+      if (!is_ignorable) {
+        ++ignore_count;
+      }
     }
   }
   if (has_in) {
